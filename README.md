@@ -22,11 +22,11 @@ RAG combines document retrieval with AI generation to create chatbots that can a
 ## Tech Stack
 
 - **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS
-- **Backend**: Vercel Edge Functions
+- **Backend**: Vercel Serverless Functions + Digital Ocean (upload processing)
 - **Database**: PostgreSQL with pgvector extension (Neon)
-- **AI/ML**: OpenAI Embeddings API + GPT-4
-- **Storage**: Vercel Blob (document storage)
-- **Text Processing**: LangChain.js, pdf-parse
+- **AI/ML**: OpenAI Embeddings API + GPT-4o
+- **Upload Service**: Digital Ocean (PDF extraction, chunking, embeddings)
+- **Text Processing**: pdf-parse
 
 ## Getting Started
 
@@ -58,7 +58,6 @@ cp .env.local.example .env.local
 Edit `.env.local` with your credentials:
 - `DATABASE_URL` - PostgreSQL connection string (with pgvector enabled)
 - `OPENAI_API_KEY` - Your OpenAI API key
-- `BLOB_READ_WRITE_TOKEN` - Vercel Blob token (optional for document storage)
 
 4. Run the development server:
 ```bash
@@ -100,20 +99,21 @@ When you upload a document:
 
 When you ask a question:
 1. Generate embedding for your question
-2. Vector similarity search in PostgreSQL (find top 5 relevant chunks)
+2. Vector similarity search in PostgreSQL (find top 3 relevant chunks)
 3. Build prompt: [retrieved chunks] + [your question]
-4. GPT-4 generates answer based on context
+4. GPT-4o generates concise answer (2-3 sentences) based on context
 5. Return response with source citations
 
 ## Cost Estimate
 
 For portfolio/demo use (~100 queries/month):
 - **OpenAI Embeddings**: ~$2/month
-- **OpenAI GPT-4**: ~$5-10/month
+- **OpenAI GPT-4o**: ~$3-5/month (cheaper than GPT-4)
 - **Neon Database**: Free tier (or $20/month for production)
-- **Vercel**: Free tier (or included in Pro plan)
+- **Vercel**: Free tier
+- **Digital Ocean**: $6/month droplet (if self-hosting upload service)
 
-**Total**: ~$10-30/month depending on usage
+**Total**: ~$10-35/month depending on usage and hosting choice
 
 ## Deployment
 
