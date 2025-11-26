@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Lock from './icons/Lock';
 import Schedule from './icons/Schedule';
 import WelcomeModal from './WelcomeModal';
+import ConfirmModal from './ConfirmModal';
 
 // Generate or retrieve session ID (client-side only)
 function getSessionId() {
@@ -25,6 +26,7 @@ export default function ChatInterface() {
   const [uploading, setUploading] = useState(false);
   const [documents, setDocuments] = useState([]);
   const [sessionId, setSessionId] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Initialize session ID on mount (client-side only)
@@ -51,10 +53,12 @@ export default function ChatInterface() {
     }
   }
 
-  async function handleClearData() {
-    if (!confirm('Are you sure you want to delete all your uploaded documents? This cannot be undone.')) {
-      return;
-    }
+  function handleClearData() {
+    setShowConfirmModal(true);
+  }
+
+  async function confirmClearData() {
+    setShowConfirmModal(false);
 
     try {
       // Get CSRF token
@@ -239,6 +243,18 @@ export default function ChatInterface() {
     <div className="flex flex-col h-full">
       {/* Welcome Modal */}
       <WelcomeModal />
+
+      {/* Confirm Clear Data Modal */}
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onConfirm={confirmClearData}
+        onCancel={() => setShowConfirmModal(false)}
+        title="Delete All Data?"
+        message="Are you sure you want to delete all your uploaded documents and conversation history? This action cannot be undone."
+        confirmText="Delete Everything"
+        cancelText="Cancel"
+        isDanger={true}
+      />
 
       {/* Session Privacy Indicator */}
       {sessionId && (
