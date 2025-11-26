@@ -58,7 +58,7 @@ async function handler(req) {
       console.log('[Upload] Detected PDF file, sending to DO for extraction...');
 
       // Send to Digital Ocean PDF extractor service
-      const extractResponse = await fetch('http://143.110.154.10:3003/extract', {
+      const extractResponse = await fetch('http://143.110.154.10:3006/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileData, fileName })
