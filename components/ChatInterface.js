@@ -156,12 +156,14 @@ export default function ChatInterface() {
     const file = e.target.files?.[0];
     if (!file || !sessionId) return;
 
-    // Validate file size (Digital Ocean handles files up to 25MB)
-    const maxSize = 25 * 1024 * 1024; // 25MB
+    // Validate file size
+    // Even though DO can handle 25MB, Vercel proxy has 4.5MB limit
+    // Base64 encoding adds ~33% overhead, so 3MB raw → ~4MB base64
+    const maxSize = 3 * 1024 * 1024; // 3MB
     if (file.size > maxSize) {
       setMessages(prev => [...prev, {
         role: 'system',
-        content: `File too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum size is 25MB.`,
+        content: `File too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum size is 3MB.`,
         error: true
       }]);
       e.target.value = ''; // Reset file input
@@ -183,8 +185,9 @@ export default function ChatInterface() {
         new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
       );
 
-      // Upload directly to Digital Ocean (bypasses Vercel limits)
-      const res = await fetch('http://143.110.154.10:3006/upload', {
+      // Upload via Vercel proxy to Digital Ocean
+      // Vercel → DO solves mixed content issue (HTTPS → HTTP)
+      const res = await fetch('/api/upload', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
