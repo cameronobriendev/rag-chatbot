@@ -50,7 +50,7 @@ export async function POST(req) {
 
     console.log(`[Chat] Query embedding generated in ${queryEmbeddingTime}ms`);
 
-    // Step 2: Vector similarity search (retrieve top 5 chunks)
+    // Step 2: Vector similarity search (retrieve top 3 chunks for faster, focused responses)
     console.log('[Chat] Searching for relevant chunks...');
     const retrievalStart = Date.now();
 
@@ -70,7 +70,7 @@ export async function POST(req) {
       JOIN documents d ON c.document_id = d.id
       WHERE d.session_id = ${sessionId}
       ORDER BY c.embedding <=> ${JSON.stringify(queryEmbedding)}
-      LIMIT 5
+      LIMIT 3
     `;
 
     const results = queryResult.rows;
@@ -104,10 +104,10 @@ export async function POST(req) {
     console.log('[Chat] Generating response with GPT-4...');
     const generationStart = Date.now();
 
-    const systemPrompt = `You are a helpful AI assistant that answers questions based on the provided context.
-Your answers should be accurate, concise, and directly reference the context when appropriate.
-If the context doesn't contain enough information to fully answer the question, say so clearly.
-Always cite which source(s) you're referencing in your answer using [1], [2], etc.`;
+    const systemPrompt = `You are a concise AI assistant that answers questions based on the provided context.
+Keep answers brief - 2-3 sentences maximum unless the question requires detail.
+Cite sources using [1], [2], etc.
+If the context doesn't answer the question, say so in one sentence.`;
 
     const userPrompt = `Context from documents:
 
@@ -117,7 +117,7 @@ ${context}
 
 Question: ${query}
 
-Answer the question based on the context above. If you reference specific information, cite the source using [1], [2], etc.`;
+Answer briefly (2-3 sentences) based on the context above. Cite sources using [1], [2], etc.`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',  // GPT-4 Omni: faster, cheaper, 128k context window
@@ -125,8 +125,8 @@ Answer the question based on the context above. If you reference specific inform
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      temperature: 0.7,
-      max_tokens: 500
+      temperature: 0.3,  // Lower temperature for more focused, concise responses
+      max_tokens: 150    // Reduced from 500 for faster, shorter answers
     });
 
     const response = completion.choices[0].message.content;
