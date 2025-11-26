@@ -1,4 +1,4 @@
-import { handleUpload } from '@vercel/blob/client';
+import { handleUpload } from '@vercel/blob';
 
 export const runtime = 'nodejs';
 
@@ -10,13 +10,15 @@ export const runtime = 'nodejs';
  */
 export async function POST(req) {
   try {
-    const body = await req.json();
-
-    return handleUpload({
-      body,
+    const jsonResponse = await handleUpload({
+      body: await req.json(),
       request: req,
       onBeforeGenerateToken: async (pathname) => {
-        // You can add validation here if needed
+        // Validate file types
+        if (!pathname.endsWith('.pdf') && !pathname.endsWith('.txt')) {
+          throw new Error('Only PDF and TXT files are allowed');
+        }
+
         return {
           allowedContentTypes: ['application/pdf', 'text/plain'],
           tokenPayload: JSON.stringify({}),
@@ -27,11 +29,13 @@ export async function POST(req) {
         console.log('[Blob Upload] File uploaded:', blob.url);
       },
     });
+
+    return Response.json(jsonResponse);
   } catch (error) {
     console.error('[Blob Upload URL] Error:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    return Response.json(
+      { error: error.message },
+      { status: 400 }
     );
   }
 }
