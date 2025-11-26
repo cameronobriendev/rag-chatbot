@@ -2,8 +2,11 @@
 
 import { useState, useRef, useEffect } from 'react';
 
-// Generate or retrieve session ID
+// Generate or retrieve session ID (client-side only)
 function getSessionId() {
+  // Only run in browser
+  if (typeof window === 'undefined') return null;
+
   let sessionId = localStorage.getItem('rag_session_id');
   if (!sessionId) {
     sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -18,13 +21,20 @@ export default function ChatInterface() {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [documents, setDocuments] = useState([]);
-  const [sessionId] = useState(() => getSessionId());
+  const [sessionId, setSessionId] = useState(null);
   const messagesEndRef = useRef(null);
+
+  // Initialize session ID on mount (client-side only)
+  useEffect(() => {
+    setSessionId(getSessionId());
+  }, []);
 
   // Fetch documents on mount
   useEffect(() => {
-    fetchDocuments();
-  }, []);
+    if (sessionId) {
+      fetchDocuments();
+    }
+  }, [sessionId]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -97,7 +107,7 @@ export default function ChatInterface() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!input.trim() || loading) return;
+    if (!input.trim() || loading || !sessionId) return;
 
     const userMessage = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
@@ -147,7 +157,7 @@ export default function ChatInterface() {
 
   async function handleFileUpload(e) {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !sessionId) return;
 
     setUploading(true);
 
@@ -220,22 +230,24 @@ export default function ChatInterface() {
   return (
     <div className="flex flex-col h-full">
       {/* Session Privacy Indicator */}
-      <div className="bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800 px-4 py-2">
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-green-700 dark:text-green-400">🔒</span>
-            <span className="text-green-800 dark:text-green-300 font-medium">
-              Private Session
-            </span>
-            <span className="text-green-600 dark:text-green-400 font-mono text-xs">
-              {sessionId.substring(0, 20)}...
+      {sessionId && (
+        <div className="bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800 px-4 py-2">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-green-700 dark:text-green-400">🔒</span>
+              <span className="text-green-800 dark:text-green-300 font-medium">
+                Private Session
+              </span>
+              <span className="text-green-600 dark:text-green-400 font-mono text-xs">
+                {sessionId.substring(0, 20)}...
+              </span>
+            </div>
+            <span className="text-green-700 dark:text-green-400 text-xs">
+              Your data is isolated and secure
             </span>
           </div>
-          <span className="text-green-700 dark:text-green-400 text-xs">
-            Your data is isolated and secure
-          </span>
         </div>
-      </div>
+      )}
 
       {/* Document Upload Section */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
@@ -260,13 +272,13 @@ export default function ChatInterface() {
                 Clear My Data
               </button>
             )}
-            <label className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors">
+            <label className={`px-4 py-2 bg-blue-500 text-white rounded-lg transition-colors ${!sessionId || uploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-blue-600'}`}>
               {uploading ? 'Uploading...' : 'Upload File'}
               <input
                 type="file"
                 accept=".pdf,.txt"
                 onChange={handleFileUpload}
-                disabled={uploading}
+                disabled={uploading || !sessionId}
                 className="hidden"
               />
             </label>
@@ -359,7 +371,7 @@ export default function ChatInterface() {
           />
           <button
             type="submit"
-            disabled={loading || !input.trim()}
+            disabled={loading || !input.trim() || !sessionId}
             className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           >
             Send
