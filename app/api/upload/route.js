@@ -4,6 +4,10 @@ import { extractTextFromPDFFile, validatePDF } from '../../../lib/pdf-extractor.
 import { chunkText, estimateTokenCount } from '../../../lib/text-chunking.js';
 import { generateEmbeddings } from '../../../lib/embeddings.js';
 
+// Route configuration for larger file uploads
+export const runtime = 'nodejs'; // Use Node.js runtime instead of Edge (supports larger payloads)
+export const maxDuration = 60; // Allow up to 60 seconds for processing
+
 /**
  * POST /api/upload
  *
