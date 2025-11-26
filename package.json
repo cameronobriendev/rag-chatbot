@@ -1,12 +1,14 @@
 {
   "name": "rag-chatbot",
   "version": "1.0.0",
+  "type": "module",
   "description": "RAG (Retrieval-Augmented Generation) chatbot with pgvector and OpenAI",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:init": "node scripts/init-db.js"
   },
   "keywords": [
     "rag",
@@ -22,6 +24,7 @@
     "@vercel/blob": "^2.0.0",
     "@vercel/postgres": "^0.10.0",
     "autoprefixer": "^10.4.22",
+    "dotenv": "^17.2.3",
     "jose": "^6.1.2",
     "langchain": "^1.1.1",
     "next": "^16.0.4",
