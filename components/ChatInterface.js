@@ -156,13 +156,12 @@ export default function ChatInterface() {
     const file = e.target.files?.[0];
     if (!file || !sessionId) return;
 
-    // Validate file size (base64 encoding adds ~33% overhead)
-    // To stay under Vercel's 4.5MB request limit, max file size is ~3MB
-    const maxSize = 3 * 1024 * 1024; // 3MB
+    // Validate file size (Digital Ocean handles files up to 25MB)
+    const maxSize = 25 * 1024 * 1024; // 25MB
     if (file.size > maxSize) {
       setMessages(prev => [...prev, {
         role: 'system',
-        content: `File too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum size is 3MB.`,
+        content: `File too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum size is 25MB.`,
         error: true
       }]);
       e.target.value = ''; // Reset file input
@@ -178,22 +177,17 @@ export default function ChatInterface() {
         content: `Uploading "${file.name}"...`
       }]);
 
-      // Convert file to base64 for JSON transport (bypasses formData 4.5MB limit)
+      // Convert file to base64 for JSON transport
       const arrayBuffer = await file.arrayBuffer();
       const base64 = btoa(
         new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
       );
 
-      // Get CSRF token
-      const csrfRes = await fetch('/api/csrf-token');
-      const { csrfToken } = await csrfRes.json();
-
-      // Send file data to backend with session ID
-      const res = await fetch('/api/upload', {
+      // Upload directly to Digital Ocean (bypasses Vercel limits)
+      const res = await fetch('http://143.110.154.10:3006/upload', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           fileData: base64,
