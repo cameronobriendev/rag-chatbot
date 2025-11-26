@@ -1,6 +1,6 @@
 import { withCsrf } from '../../../lib/csrf-middleware.js';
 import { getDB } from '../../../lib/db.js';
-import { extractTextFromPDFFile, validatePDF } from '../../../lib/pdf-extractor.js';
+import { extractTextFromPDF } from '../../../lib/pdf-extractor.js';
 import { chunkText, estimateTokenCount } from '../../../lib/text-chunking.js';
 import { generateEmbeddings } from '../../../lib/embeddings.js';
 
@@ -14,52 +14,66 @@ export const maxDuration = 60; // Allow up to 60 seconds for processing
  * Upload and process a document for RAG
  *
  * Flow:
- * 1. Validate file (PDF or TXT)
- * 2. Extract text
- * 3. Chunk text (500 tokens with 50-token overlap)
- * 4. Generate embeddings for each chunk
- * 5. Store in database (documents + chunks tables)
+ * 1. Receive Blob URL from frontend (file already uploaded to Vercel Blob)
+ * 2. Fetch file from Blob URL
+ * 3. Extract text (PDF or TXT)
+ * 4. Chunk text (500 tokens with 50-token overlap)
+ * 5. Generate embeddings for each chunk
+ * 6. Store in database (documents + chunks tables)
  *
  * Returns: Document metadata with chunk count
  */
 async function handler(req) {
   try {
-    const formData = await req.formData();
-    const file = formData.get('file');
+    // Receive JSON with Blob URL instead of FormData
+    const body = await req.json();
+    const { blobUrl, fileName, fileSize, fileType } = body;
 
-    if (!file) {
+    if (!blobUrl || !fileName) {
       return new Response(
-        JSON.stringify({ error: 'No file provided' }),
+        JSON.stringify({ error: 'Missing blobUrl or fileName' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
+    console.log(`[Upload] Fetching file from Blob: ${fileName}`);
+
+    // Fetch file from Vercel Blob
+    const blobResponse = await fetch(blobUrl);
+    if (!blobResponse.ok) {
+      throw new Error(`Failed to fetch from Blob: ${blobResponse.statusText}`);
+    }
+
     // Determine file type and extract text
     let text = '';
-    let fileType = '';
+    let detectedFileType = '';
 
-    if (file.type === 'application/pdf') {
-      // Validate PDF
-      const validation = validatePDF(file);
-      if (!validation.valid) {
+    if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
+      // Validate file size
+      const maxSize = 25 * 1024 * 1024; // 25MB
+      if (fileSize > maxSize) {
         return new Response(
-          JSON.stringify({ error: validation.error }),
+          JSON.stringify({ error: 'PDF file too large (max 25MB)' }),
           { status: 400, headers: { 'Content-Type': 'application/json' } }
         );
       }
 
+      // Convert response to buffer
+      const arrayBuffer = await blobResponse.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
       // Extract text from PDF
-      const pdfData = await extractTextFromPDFFile(file);
+      const pdfData = await extractTextFromPDF(buffer);
       text = pdfData.text;
-      fileType = 'pdf';
+      detectedFileType = 'pdf';
 
-      console.log(`[Upload] Extracted ${pdfData.pages} pages from PDF: ${file.name}`);
-    } else if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+      console.log(`[Upload] Extracted ${pdfData.pages} pages from PDF: ${fileName}`);
+    } else if (fileType === 'text/plain' || fileName.endsWith('.txt')) {
       // Extract text from TXT file
-      text = await file.text();
-      fileType = 'txt';
+      text = await blobResponse.text();
+      detectedFileType = 'txt';
 
-      console.log(`[Upload] Read text file: ${file.name}`);
+      console.log(`[Upload] Read text file: ${fileName}`);
     } else {
       return new Response(
         JSON.stringify({ error: 'Unsupported file type. Please upload PDF or TXT files.' }),
@@ -102,11 +116,11 @@ async function handler(req) {
     const documentResult = await db`
       INSERT INTO documents (name, file_type, file_size, chunk_count, metadata)
       VALUES (
-        ${file.name},
-        ${fileType},
-        ${file.size},
+        ${fileName},
+        ${detectedFileType},
+        ${fileSize},
         ${chunks.length},
-        ${JSON.stringify({ uploadedAt: new Date().toISOString() })}
+        ${JSON.stringify({ uploadedAt: new Date().toISOString(), blobUrl })}
       )
       RETURNING id, name, file_type, chunk_count, upload_date
     `;

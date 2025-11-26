@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { put } from '@vercel/blob/client';
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState([]);
@@ -85,24 +86,49 @@ export default function ChatInterface() {
     setUploading(true);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      // Step 1: Upload file to Vercel Blob (no size limit)
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: `Uploading "${file.name}" to storage...`
+      }]);
 
-      // Get CSRF token first
+      const blob = await put(file.name, file, {
+        access: 'public',
+        token: process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN,
+      });
+
+      // Step 2: Send blob URL to backend for processing
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: 'Processing document...'
+      }]);
+
+      // Get CSRF token
       const csrfRes = await fetch('/api/csrf-token');
       const { csrfToken } = await csrfRes.json();
 
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'X-CSRF-Token': csrfToken
         },
-        body: formData
+        body: JSON.stringify({
+          blobUrl: blob.url,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type
+        })
       });
 
       const data = await res.json();
 
       if (res.ok) {
+        // Remove temporary messages
+        setMessages(prev => prev.filter(m =>
+          !m.content.includes('Uploading') && !m.content.includes('Processing')
+        ));
+
         // Add success message
         setMessages(prev => [...prev, {
           role: 'system',
@@ -121,7 +147,7 @@ export default function ChatInterface() {
       console.error('Error uploading file:', error);
       setMessages(prev => [...prev, {
         role: 'system',
-        content: 'Upload failed: Network error',
+        content: `Upload failed: ${error.message}`,
         error: true
       }]);
     } finally {
