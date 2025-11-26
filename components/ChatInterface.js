@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { upload } from '@vercel/blob/client';
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState([]);
@@ -86,28 +85,23 @@ export default function ChatInterface() {
     setUploading(true);
 
     try {
-      // Step 1: Upload file to Vercel Blob (no size limit)
+      // Show uploading message
       setMessages(prev => [...prev, {
         role: 'system',
-        content: `Uploading "${file.name}" to storage...`
+        content: `Uploading "${file.name}"...`
       }]);
 
-      // Upload to Vercel Blob using server-generated upload URL
-      const blob = await upload(file.name, file, {
-        access: 'public',
-        handleUploadUrl: '/api/blob-upload-url',
-      });
-
-      // Step 2: Send blob URL to backend for processing
-      setMessages(prev => [...prev, {
-        role: 'system',
-        content: 'Processing document...'
-      }]);
+      // Convert file to base64 for JSON transport (bypasses formData 4.5MB limit)
+      const arrayBuffer = await file.arrayBuffer();
+      const base64 = btoa(
+        new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
 
       // Get CSRF token
       const csrfRes = await fetch('/api/csrf-token');
       const { csrfToken } = await csrfRes.json();
 
+      // Send file data to backend
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: {
@@ -115,7 +109,7 @@ export default function ChatInterface() {
           'X-CSRF-Token': csrfToken
         },
         body: JSON.stringify({
-          blobUrl: blob.url,
+          fileData: base64,
           fileName: file.name,
           fileSize: file.size,
           fileType: file.type
@@ -125,10 +119,8 @@ export default function ChatInterface() {
       const data = await res.json();
 
       if (res.ok) {
-        // Remove temporary messages
-        setMessages(prev => prev.filter(m =>
-          !m.content.includes('Uploading') && !m.content.includes('Processing')
-        ));
+        // Remove uploading message
+        setMessages(prev => prev.filter(m => !m.content.includes('Uploading')));
 
         // Add success message
         setMessages(prev => [...prev, {

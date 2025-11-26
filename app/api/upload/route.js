@@ -14,8 +14,8 @@ export const maxDuration = 60; // Allow up to 60 seconds for processing
  * Upload and process a document for RAG
  *
  * Flow:
- * 1. Receive Blob URL from frontend (file already uploaded to Vercel Blob)
- * 2. Fetch file from Blob URL
+ * 1. Receive base64 file data from frontend (sent as JSON, bypasses 4.5MB formData limit)
+ * 2. Convert base64 to buffer
  * 3. Extract text (PDF or TXT)
  * 4. Chunk text (500 tokens with 50-token overlap)
  * 5. Generate embeddings for each chunk
@@ -25,43 +25,36 @@ export const maxDuration = 60; // Allow up to 60 seconds for processing
  */
 async function handler(req) {
   try {
-    // Receive JSON with Blob URL instead of FormData
+    // Receive JSON with base64 file data
     const body = await req.json();
-    const { blobUrl, fileName, fileSize, fileType } = body;
+    const { fileData, fileName, fileSize, fileType } = body;
 
-    if (!blobUrl || !fileName) {
+    if (!fileData || !fileName) {
       return new Response(
-        JSON.stringify({ error: 'Missing blobUrl or fileName' }),
+        JSON.stringify({ error: 'Missing fileData or fileName' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`[Upload] Fetching file from Blob: ${fileName}`);
+    console.log(`[Upload] Processing file: ${fileName} (${fileSize} bytes)`);
 
-    // Fetch file from Vercel Blob
-    const blobResponse = await fetch(blobUrl);
-    if (!blobResponse.ok) {
-      throw new Error(`Failed to fetch from Blob: ${blobResponse.statusText}`);
+    // Validate file size
+    const maxSize = 25 * 1024 * 1024; // 25MB
+    if (fileSize > maxSize) {
+      return new Response(
+        JSON.stringify({ error: 'File too large (max 25MB)' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
+
+    // Convert base64 to buffer
+    const buffer = Buffer.from(fileData, 'base64');
 
     // Determine file type and extract text
     let text = '';
     let detectedFileType = '';
 
     if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
-      // Validate file size
-      const maxSize = 25 * 1024 * 1024; // 25MB
-      if (fileSize > maxSize) {
-        return new Response(
-          JSON.stringify({ error: 'PDF file too large (max 25MB)' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Convert response to buffer
-      const arrayBuffer = await blobResponse.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
       // Extract text from PDF
       const pdfData = await extractTextFromPDF(buffer);
       text = pdfData.text;
@@ -70,7 +63,7 @@ async function handler(req) {
       console.log(`[Upload] Extracted ${pdfData.pages} pages from PDF: ${fileName}`);
     } else if (fileType === 'text/plain' || fileName.endsWith('.txt')) {
       // Extract text from TXT file
-      text = await blobResponse.text();
+      text = buffer.toString('utf-8');
       detectedFileType = 'txt';
 
       console.log(`[Upload] Read text file: ${fileName}`);
@@ -120,7 +113,7 @@ async function handler(req) {
         ${detectedFileType},
         ${fileSize},
         ${chunks.length},
-        ${JSON.stringify({ uploadedAt: new Date().toISOString(), blobUrl })}
+        ${JSON.stringify({ uploadedAt: new Date().toISOString() })}
       )
       RETURNING id, name, file_type, chunk_count, upload_date
     `;
