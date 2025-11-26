@@ -219,6 +219,24 @@ export default function ChatInterface() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Session Privacy Indicator */}
+      <div className="bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800 px-4 py-2">
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-green-700 dark:text-green-400">🔒</span>
+            <span className="text-green-800 dark:text-green-300 font-medium">
+              Private Session
+            </span>
+            <span className="text-green-600 dark:text-green-400 font-mono text-xs">
+              {sessionId.substring(0, 20)}...
+            </span>
+          </div>
+          <span className="text-green-700 dark:text-green-400 text-xs">
+            Your data is isolated and secure
+          </span>
+        </div>
+      </div>
+
       {/* Document Upload Section */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-center justify-between">
