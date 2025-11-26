@@ -41,6 +41,59 @@ export default function ChatInterface() {
     }
   }
 
+  async function handleClearData() {
+    if (!confirm('Are you sure you want to delete all your uploaded documents? This cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // Get CSRF token
+      const csrfRes = await fetch('/api/csrf-token');
+      const { csrfToken } = await csrfRes.json();
+
+      // Clear session data
+      const res = await fetch('/api/clear-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify({ sessionId })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Clear localStorage
+        localStorage.removeItem('rag_session_id');
+
+        // Show success message
+        setMessages([{
+          role: 'system',
+          content: `✅ ${data.message}. Refreshing...`
+        }]);
+
+        // Reload page after 1 second
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: `Failed to clear data: ${data.error}`,
+          error: true
+        }]);
+      }
+    } catch (error) {
+      console.error('Error clearing data:', error);
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: `Failed to clear data: ${error.message}`,
+        error: true
+      }]);
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -180,16 +233,26 @@ export default function ChatInterface() {
               </p>
             )}
           </div>
-          <label className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors">
-            {uploading ? 'Uploading...' : 'Upload File'}
-            <input
-              type="file"
-              accept=".pdf,.txt"
-              onChange={handleFileUpload}
-              disabled={uploading}
-              className="hidden"
-            />
-          </label>
+          <div className="flex gap-2">
+            {documents.length > 0 && (
+              <button
+                onClick={handleClearData}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                Clear My Data
+              </button>
+            )}
+            <label className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors">
+              {uploading ? 'Uploading...' : 'Upload File'}
+              <input
+                type="file"
+                accept=".pdf,.txt"
+                onChange={handleFileUpload}
+                disabled={uploading}
+                className="hidden"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
