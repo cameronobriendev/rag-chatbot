@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Lock from './icons/Lock';
+import Schedule from './icons/Schedule';
+import WelcomeModal from './WelcomeModal';
 
 // Generate or retrieve session ID (client-side only)
 function getSessionId() {
@@ -234,20 +237,23 @@ export default function ChatInterface() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Welcome Modal */}
+      <WelcomeModal />
+
       {/* Session Privacy Indicator */}
       {sessionId && (
-        <div className="bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800 px-4 py-2">
+        <div className="glass-card border-b px-4 py-2">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
-              <span className="text-green-700 dark:text-green-400">🔒</span>
-              <span className="text-green-800 dark:text-green-300 font-medium">
+              <Lock className="w-4 h-4" />
+              <span className="font-medium">
                 Private Session
               </span>
-              <span className="text-green-600 dark:text-green-400 font-mono text-xs">
+              <span className="font-mono text-xs opacity-80">
                 {sessionId.substring(0, 20)}...
               </span>
             </div>
-            <span className="text-green-700 dark:text-green-400 text-xs">
+            <span className="text-xs opacity-90">
               Your data is isolated and secure
             </span>
           </div>
@@ -255,14 +261,14 @@ export default function ChatInterface() {
       )}
 
       {/* Document Upload Section */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+      <div className="glass-card border-b p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-gray-800 dark:text-white">
+            <h3 className="font-semibold">
               Documents ({documents.length})
             </h3>
             {documents.length > 0 && (
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm opacity-80">
                 {documents.slice(0, 3).map(d => d.name).join(', ')}
                 {documents.length > 3 && ` +${documents.length - 3} more`}
               </p>
@@ -277,7 +283,7 @@ export default function ChatInterface() {
                 Clear My Data
               </button>
             )}
-            <label className={`px-4 py-2 bg-blue-500 text-white rounded-lg transition-colors ${!sessionId || uploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-blue-600'}`}>
+            <label className={`glass-button px-4 py-2 rounded-lg transition-colors ${!sessionId || uploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
               {uploading ? 'Uploading...' : 'Upload File'}
               <input
                 type="file"
@@ -294,8 +300,8 @@ export default function ChatInterface() {
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
-          <div className="text-center text-gray-500 dark:text-gray-400 mt-20">
-            <p className="text-lg mb-2">👋 Welcome to RAG Chatbot!</p>
+          <div className="text-center opacity-90 mt-20">
+            <p className="text-lg mb-2">Welcome to RAG Chatbot!</p>
             <p className="text-sm">Upload documents and ask questions about them.</p>
           </div>
         )}
@@ -308,30 +314,30 @@ export default function ChatInterface() {
             <div
               className={`max-w-[80%] rounded-lg p-4 ${
                 msg.role === 'user'
-                  ? 'bg-blue-500 text-white'
+                  ? 'message-user'
                   : msg.role === 'system'
                   ? msg.error
-                    ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100'
-                    : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100'
+                    ? 'bg-red-500/20 border border-red-500/40 text-white'
+                    : 'message-system'
                   : msg.error
-                  ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white'
+                  ? 'bg-red-500/20 border border-red-500/40 text-white'
+                  : 'message-assistant'
               }`}
             >
               <div className="whitespace-pre-wrap">{msg.content}</div>
 
               {/* Sources */}
               {msg.sources && msg.sources.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-gray-300 dark:border-gray-600">
+                <div className="mt-3 pt-3 border-t border-white/20">
                   <p className="text-sm font-semibold mb-2">Sources:</p>
                   {msg.sources.map((source, i) => (
-                    <div key={i} className="text-xs mb-2 opacity-90">
+                    <div key={i} className="source-card text-xs mb-2 p-2 rounded">
                       <span className="font-medium">[{source.index}]</span>{' '}
                       {source.documentName}{' '}
                       <span className="opacity-75">
                         (similarity: {(source.similarity * 100).toFixed(1)}%)
                       </span>
-                      <p className="mt-1 italic">{source.preview}</p>
+                      <p className="mt-1 italic opacity-90">{source.preview}</p>
                     </div>
                   ))}
                 </div>
@@ -339,8 +345,8 @@ export default function ChatInterface() {
 
               {/* Metadata */}
               {msg.metadata && (
-                <div className="mt-2 text-xs opacity-75">
-                  ⏱️ {msg.metadata.totalTime}ms
+                <div className="mt-2 text-xs opacity-75 flex items-center gap-1">
+                  <Schedule className="w-3 h-3" /> {msg.metadata.totalTime}ms
                   {msg.metadata.chunksRetrieved && ` • ${msg.metadata.chunksRetrieved} chunks`}
                 </div>
               )}
@@ -350,11 +356,11 @@ export default function ChatInterface() {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
+            <div className="glass-card rounded-lg p-4">
               <div className="flex space-x-2">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
               </div>
             </div>
           </div>
@@ -364,20 +370,20 @@ export default function ChatInterface() {
       </div>
 
       {/* Input Form */}
-      <form onSubmit={handleSubmit} className="border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
+      <form onSubmit={handleSubmit} className="glass-card border-t p-4">
         <div className="flex gap-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question about your documents..."
-            className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            className="flex-1 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
             disabled={loading}
           />
           <button
             type="submit"
             disabled={loading || !input.trim() || !sessionId}
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+            className="glass-button px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           >
             Send
           </button>

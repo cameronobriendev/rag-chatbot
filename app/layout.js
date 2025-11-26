@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./theme.css";
 
 export const metadata = {
   title: "RAG Chatbot",
@@ -10,8 +11,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className="w-full">
+      <body className="w-full">{children}</body>
     </html>
   );
 }

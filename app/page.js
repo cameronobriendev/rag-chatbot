@@ -1,66 +1,87 @@
 import ChatInterface from '../components/ChatInterface';
+import MenuBook from '../components/icons/MenuBook';
+import Search from '../components/icons/Search';
+import SmartToy from '../components/icons/SmartToy';
+import Settings from '../components/icons/Settings';
+import Palette from '../components/icons/Palette';
+import SyncAlt from '../components/icons/SyncAlt';
+import Stars from '../components/icons/Stars';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <main className="min-h-screen w-full">
+      {/* Navigation Buttons */}
+      <a
+        href="https://cameronobrien.dev"
+        className="nav-btn top-5 left-5 z-50 px-4 py-2 rounded-lg text-sm font-medium hidden md:inline-block"
+      >
+        Back to Portfolio
+      </a>
+      <a
+        href="https://github.com/cameronobriendev/rag-chatbot"
+        className="nav-btn top-5 right-5 z-50 px-4 py-2 rounded-lg text-sm font-medium hidden md:inline-block"
+      >
+        View on GitHub
+      </a>
+
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto w-full">
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">
+            <h1 className="text-4xl font-bold mb-2">
               RAG Chatbot
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="opacity-90">
               Retrieval-Augmented Generation with pgvector + OpenAI
             </p>
           </div>
 
           {/* Chat Interface */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg flex flex-col overflow-hidden h-[700px]">
+          <div className="glass-card rounded-lg flex flex-col overflow-hidden h-[700px]">
             <ChatInterface />
           </div>
 
           {/* Info Section */}
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-              <h3 className="font-semibold mb-2 text-gray-800 dark:text-white">
-                📚 Knowledge Base
+            <div className="glass-card rounded-lg p-4">
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <MenuBook className="w-5 h-5" /> Knowledge Base
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm opacity-80">
                 Upload documents to build your custom knowledge base
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-              <h3 className="font-semibold mb-2 text-gray-800 dark:text-white">
-                🔍 Smart Search
+            <div className="glass-card rounded-lg p-4">
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <Search className="w-5 h-5" /> Smart Search
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm opacity-80">
                 Vector similarity search finds relevant context
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-              <h3 className="font-semibold mb-2 text-gray-800 dark:text-white">
-                🤖 AI Responses
+            <div className="glass-card rounded-lg p-4">
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <SmartToy className="w-5 h-5" /> AI Responses
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm opacity-80">
                 GPT-4 generates answers based on your data
               </p>
             </div>
           </div>
 
           {/* Tech Stack & Architecture */}
-          <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+          <div className="mt-6 glass-card rounded-lg p-6">
+            <h2 className="text-2xl font-bold mb-4">
               Tech Stack & Architecture
             </h2>
 
             {/* Tech Stack Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div>
-                <h3 className="font-semibold mb-3 text-gray-800 dark:text-white flex items-center">
-                  <span className="mr-2">⚙️</span> Backend
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Settings className="w-5 h-5" /> Backend
                 </h3>
-                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <ul className="space-y-2 text-sm opacity-90">
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
                     <span><strong>Next.js 16</strong> - Serverless API routes</span>
@@ -81,10 +102,10 @@ export default function Home() {
               </div>
 
               <div>
-                <h3 className="font-semibold mb-3 text-gray-800 dark:text-white flex items-center">
-                  <span className="mr-2">🎨</span> Frontend
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Palette className="w-5 h-5" /> Frontend
                 </h3>
-                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <ul className="space-y-2 text-sm opacity-90">
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
                     <span><strong>React 19</strong> - Modern UI with hooks</span>
@@ -107,37 +128,37 @@ export default function Home() {
 
             {/* Flow Diagram */}
             <div>
-              <h3 className="font-semibold mb-4 text-gray-800 dark:text-white flex items-center">
-                <span className="mr-2">🔄</span> Data Flow
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <SyncAlt className="w-5 h-5" /> Data Flow
               </h3>
 
               {/* Upload Flow */}
               <div className="mb-6">
-                <h4 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">
+                <h4 className="text-sm font-semibold mb-3 opacity-90">
                   Document Upload Flow:
                 </h4>
                 <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <div className="bg-blue-100 dark:bg-blue-900 px-3 py-2 rounded text-blue-800 dark:text-blue-100 font-medium">
+                  <div className="px-3 py-2 rounded font-medium bg-blue-900/60 border border-blue-700/50">
                     PDF/TXT Upload
                   </div>
-                  <span className="text-gray-400">→</span>
-                  <div className="bg-purple-100 dark:bg-purple-900 px-3 py-2 rounded text-purple-800 dark:text-purple-100 font-medium">
+                  <span className="opacity-60">→</span>
+                  <div className="px-3 py-2 rounded font-medium bg-purple-900/60 border border-purple-700/50">
                     Vercel Blob
                   </div>
-                  <span className="text-gray-400">→</span>
-                  <div className="bg-green-100 dark:bg-green-900 px-3 py-2 rounded text-green-800 dark:text-green-100 font-medium">
+                  <span className="opacity-60">→</span>
+                  <div className="px-3 py-2 rounded font-medium bg-green-900/60 border border-green-700/50">
                     Extract Text
                   </div>
-                  <span className="text-gray-400">→</span>
-                  <div className="bg-yellow-100 dark:bg-yellow-900 px-3 py-2 rounded text-yellow-800 dark:text-yellow-100 font-medium">
+                  <span className="opacity-60">→</span>
+                  <div className="px-3 py-2 rounded font-medium bg-yellow-900/60 border border-yellow-700/50">
                     Chunk (500 tokens)
                   </div>
-                  <span className="text-gray-400">→</span>
-                  <div className="bg-orange-100 dark:bg-orange-900 px-3 py-2 rounded text-orange-800 dark:text-orange-100 font-medium">
+                  <span className="opacity-60">→</span>
+                  <div className="px-3 py-2 rounded font-medium bg-orange-900/60 border border-orange-700/50">
                     Generate Embeddings
                   </div>
-                  <span className="text-gray-400">→</span>
-                  <div className="bg-indigo-100 dark:bg-indigo-900 px-3 py-2 rounded text-indigo-800 dark:text-indigo-100 font-medium">
+                  <span className="opacity-60">→</span>
+                  <div className="px-3 py-2 rounded font-medium bg-indigo-900/60 border border-indigo-700/50">
                     Store in Neon
                   </div>
                 </div>
@@ -145,31 +166,31 @@ export default function Home() {
 
               {/* Query Flow */}
               <div>
-                <h4 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">
+                <h4 className="text-sm font-semibold mb-3 opacity-90">
                   Query Flow:
                 </h4>
                 <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <div className="bg-blue-100 dark:bg-blue-900 px-3 py-2 rounded text-blue-800 dark:text-blue-100 font-medium">
+                  <div className="px-3 py-2 rounded font-medium bg-blue-900/60 border border-blue-700/50">
                     User Question
                   </div>
-                  <span className="text-gray-400">→</span>
-                  <div className="bg-orange-100 dark:bg-orange-900 px-3 py-2 rounded text-orange-800 dark:text-orange-100 font-medium">
+                  <span className="opacity-60">→</span>
+                  <div className="px-3 py-2 rounded font-medium bg-orange-900/60 border border-orange-700/50">
                     Embed Query
                   </div>
-                  <span className="text-gray-400">→</span>
-                  <div className="bg-indigo-100 dark:bg-indigo-900 px-3 py-2 rounded text-indigo-800 dark:text-indigo-100 font-medium">
+                  <span className="opacity-60">→</span>
+                  <div className="px-3 py-2 rounded font-medium bg-indigo-900/60 border border-indigo-700/50">
                     Vector Search (pgvector)
                   </div>
-                  <span className="text-gray-400">→</span>
-                  <div className="bg-green-100 dark:bg-green-900 px-3 py-2 rounded text-green-800 dark:text-green-100 font-medium">
+                  <span className="opacity-60">→</span>
+                  <div className="px-3 py-2 rounded font-medium bg-green-900/60 border border-green-700/50">
                     Retrieve Top 5 Chunks
                   </div>
-                  <span className="text-gray-400">→</span>
-                  <div className="bg-purple-100 dark:bg-purple-900 px-3 py-2 rounded text-purple-800 dark:text-purple-100 font-medium">
+                  <span className="opacity-60">→</span>
+                  <div className="px-3 py-2 rounded font-medium bg-purple-900/60 border border-purple-700/50">
                     GPT-4 + Context
                   </div>
-                  <span className="text-gray-400">→</span>
-                  <div className="bg-yellow-100 dark:bg-yellow-900 px-3 py-2 rounded text-yellow-800 dark:text-yellow-100 font-medium">
+                  <span className="opacity-60">→</span>
+                  <div className="px-3 py-2 rounded font-medium bg-yellow-900/60 border border-yellow-700/50">
                     AI Response
                   </div>
                 </div>
@@ -177,11 +198,11 @@ export default function Home() {
             </div>
 
             {/* Key Features */}
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <h3 className="font-semibold mb-3 text-gray-800 dark:text-white">
-                🎯 Key Technical Features
+            <div className="mt-6 pt-6 border-t border-white/20">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Stars className="w-5 h-5" /> Key Technical Features
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600 dark:text-gray-400">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm opacity-90">
                 <div className="flex items-start">
                   <span className="mr-2">✓</span>
                   <span><strong>HNSW Indexing:</strong> Fast approximate nearest neighbor search</span>

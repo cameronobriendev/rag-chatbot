@@ -1,0 +1,245 @@
+/* ============================================
+   PURPLE GLASSMORPHISM THEME
+   Adapted from portfolio site
+   ============================================ */
+
+/* ============================================
+   NAVIGATION BUTTONS
+   ============================================ */
+.nav-btn {
+  position: fixed !important;
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+  transition: all var(--transition-normal) !important;
+  overflow: hidden;
+}
+
+.nav-btn:hover {
+  background: var(--glass-bg-hover) !important;
+  border-color: var(--glass-border-hover) !important;
+  transform: scale(1.05);
+}
+
+/* ============================================
+   CSS VARIABLES
+   ============================================ */
+:root {
+  /* Colors - Purple Gradient Palette */
+  --primary: #5566d8;
+  --primary-light: #7788ff;
+  --accent: #8b5cf6;
+  --accent-light: #a78bfa;
+
+  /* Glass Effect */
+  --glass-bg: rgba(0, 0, 0, 0.15);
+  --glass-bg-hover: rgba(0, 0, 0, 0.25);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-border-hover: rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  --glass-shadow-hover: 0 30px 80px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 255, 255, 0.2);
+
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.95);
+  --text-muted: rgba(255, 255, 255, 0.8);
+
+  /* Transitions */
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   BASE - Background
+   ============================================ */
+body {
+  background: linear-gradient(135deg, #5566d8 0%, #6a3b92 100%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* ============================================
+   GLASSMORPHISM CARDS
+   ============================================ */
+.glass-card {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+  transition: all var(--transition-normal) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card:hover {
+  background: var(--glass-bg-hover) !important;
+  border-color: var(--glass-border-hover) !important;
+  box-shadow: var(--glass-shadow-hover) !important;
+}
+
+/* Shimmer effect */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: translateX(-100%) rotate(45deg);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+
+.glass-card:hover::before {
+  transform: translateX(100%) rotate(45deg);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+button {
+  position: relative;
+  overflow: hidden;
+}
+
+button.glass-button {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4) !important;
+}
+
+button.glass-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5) !important;
+}
+
+button.glass-button:active:not(:disabled) {
+  transform: translateY(0) scale(0.97) !important;
+}
+
+/* Shimmer on buttons */
+button.glass-button::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: translateX(-100%) rotate(45deg);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+
+button.glass-button:hover::before {
+  transform: translateX(100%) rotate(45deg);
+}
+
+/* ============================================
+   TEXT OVERRIDES
+   ============================================ */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary) !important;
+}
+
+p {
+  color: var(--text-muted);
+}
+
+/* ============================================
+   INPUT FIELDS
+   ============================================ */
+input[type="text"],
+input[type="file"],
+textarea {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  color: var(--text-primary) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+input[type="text"]:focus,
+textarea:focus {
+  border-color: var(--glass-border-hover) !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+}
+
+input::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 0.7;
+}
+
+/* ============================================
+   CHAT MESSAGES
+   ============================================ */
+.message-user {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%) !important;
+  color: var(--text-primary) !important;
+}
+
+.message-assistant {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: var(--text-primary) !important;
+}
+
+.message-system {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: var(--text-muted) !important;
+}
+
+/* ============================================
+   SOURCE CITATIONS
+   ============================================ */
+.source-card {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: all var(--transition-normal);
+}
+
+.source-card:hover {
+  background: var(--glass-bg-hover) !important;
+  border-color: var(--glass-border-hover) !important;
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   BADGES & PILLS
+   ============================================ */
+.badge, .pill {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
