@@ -36,12 +36,7 @@ export default function ChatInterface() {
     }
   }, [sessionId]);
 
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    if (messages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
+  // Removed auto-scroll - let user control scrolling manually
 
   async function fetchDocuments() {
     try {
