@@ -183,9 +183,9 @@ export default function ChatInterface() {
         new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
       );
 
-      // Upload directly to Digital Ocean via HTTPS subdomain
-      // This bypasses Vercel's 4.5MB limit entirely
-      const res = await fetch('https://uploads.rag.cameronobrien.dev/upload', {
+      // Upload to external service (supports larger files than Vercel's 4.5MB limit)
+      const uploadUrl = process.env.NEXT_PUBLIC_UPLOAD_URL || '/api/upload';
+      const res = await fetch(uploadUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
