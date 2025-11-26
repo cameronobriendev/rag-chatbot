@@ -156,6 +156,19 @@ export default function ChatInterface() {
     const file = e.target.files?.[0];
     if (!file || !sessionId) return;
 
+    // Validate file size (base64 encoding adds ~33% overhead)
+    // To stay under Vercel's 4.5MB request limit, max file size is ~3MB
+    const maxSize = 3 * 1024 * 1024; // 3MB
+    if (file.size > maxSize) {
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: `File too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum size is 3MB.`,
+        error: true
+      }]);
+      e.target.value = ''; // Reset file input
+      return;
+    }
+
     setUploading(true);
 
     try {

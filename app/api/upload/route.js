@@ -7,6 +7,12 @@ import { generateEmbeddings } from '../../../lib/embeddings.js';
 export const runtime = 'nodejs'; // Use Node.js runtime instead of Edge (supports larger payloads)
 export const maxDuration = 60; // Allow up to 60 seconds for processing
 
+// Next.js 15+ body size configuration
+export const dynamic = 'force-dynamic';
+
+// Vercel-specific configuration (requires vercel.json)
+// For now, we'll validate on client side to stay under 4.5MB limit
+
 /**
  * POST /api/upload
  *
@@ -37,11 +43,11 @@ async function handler(req) {
 
     console.log(`[Upload] Processing file: ${fileName} (${fileSize} bytes) for session: ${sessionId}`);
 
-    // Validate file size
-    const maxSize = 25 * 1024 * 1024; // 25MB
+    // Validate file size (3MB limit due to Vercel request body limits + base64 overhead)
+    const maxSize = 3 * 1024 * 1024; // 3MB
     if (fileSize > maxSize) {
       return new Response(
-        JSON.stringify({ error: 'File too large (max 25MB)' }),
+        JSON.stringify({ error: 'File too large (max 3MB)' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
