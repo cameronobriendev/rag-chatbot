@@ -2,12 +2,23 @@
 
 import { useState, useRef, useEffect } from 'react';
 
+// Generate or retrieve session ID
+function getSessionId() {
+  let sessionId = localStorage.getItem('rag_session_id');
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('rag_session_id', sessionId);
+  }
+  return sessionId;
+}
+
 export default function ChatInterface() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [documents, setDocuments] = useState([]);
+  const [sessionId] = useState(() => getSessionId());
   const messagesEndRef = useRef(null);
 
   // Fetch documents on mount
@@ -44,7 +55,10 @@ export default function ChatInterface() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: input })
+        body: JSON.stringify({
+          query: input,
+          sessionId: sessionId
+        })
       });
 
       const data = await res.json();
@@ -101,7 +115,7 @@ export default function ChatInterface() {
       const csrfRes = await fetch('/api/csrf-token');
       const { csrfToken } = await csrfRes.json();
 
-      // Send file data to backend
+      // Send file data to backend with session ID
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: {
@@ -112,7 +126,8 @@ export default function ChatInterface() {
           fileData: base64,
           fileName: file.name,
           fileSize: file.size,
-          fileType: file.type
+          fileType: file.type,
+          sessionId: sessionId
         })
       });
 

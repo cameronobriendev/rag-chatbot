@@ -26,16 +26,16 @@ async function handler(req) {
   try {
     // Receive JSON with base64 file data
     const body = await req.json();
-    const { fileData, fileName, fileSize, fileType } = body;
+    const { fileData, fileName, fileSize, fileType, sessionId } = body;
 
-    if (!fileData || !fileName) {
+    if (!fileData || !fileName || !sessionId) {
       return new Response(
-        JSON.stringify({ error: 'Missing fileData or fileName' }),
+        JSON.stringify({ error: 'Missing required fields: fileData, fileName, or sessionId' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`[Upload] Processing file: ${fileName} (${fileSize} bytes)`);
+    console.log(`[Upload] Processing file: ${fileName} (${fileSize} bytes) for session: ${sessionId}`);
 
     // Validate file size
     const maxSize = 25 * 1024 * 1024; // 25MB
@@ -118,14 +118,18 @@ async function handler(req) {
     // Store in database
     const db = getDB();
 
-    // Insert document metadata
+    // Cleanup old sessions (older than 24 hours)
+    await db`SELECT cleanup_old_sessions()`;
+
+    // Insert document metadata with session_id
     const documentResult = await db`
-      INSERT INTO documents (name, file_type, file_size, chunk_count, metadata)
+      INSERT INTO documents (name, file_type, file_size, chunk_count, session_id, metadata)
       VALUES (
         ${fileName},
         ${detectedFileType},
         ${fileSize},
         ${chunks.length},
+        ${sessionId},
         ${JSON.stringify({ uploadedAt: new Date().toISOString() })}
       )
       RETURNING id, name, file_type, chunk_count, upload_date

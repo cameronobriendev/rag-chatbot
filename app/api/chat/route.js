@@ -24,7 +24,7 @@ export async function POST(req) {
   const startTime = Date.now();
 
   try {
-    const { query } = await req.json();
+    const { query, sessionId } = await req.json();
 
     if (!query || query.trim().length === 0) {
       return new Response(
@@ -33,7 +33,14 @@ export async function POST(req) {
       );
     }
 
-    console.log('[Chat] Query:', query);
+    if (!sessionId) {
+      return new Response(
+        JSON.stringify({ error: 'Session ID is required' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`[Chat] Query from session ${sessionId}:`, query);
 
     // Step 1: Generate embedding for user question
     console.log('[Chat] Generating query embedding...');
@@ -51,6 +58,7 @@ export async function POST(req) {
 
     // Use pgvector cosine similarity to find most relevant chunks
     // <=> is the cosine distance operator in pgvector
+    // Filter by session_id to isolate user's documents
     const results = await db`
       SELECT
         c.id,
@@ -60,6 +68,7 @@ export async function POST(req) {
         1 - (c.embedding <=> ${JSON.stringify(queryEmbedding)}) as similarity
       FROM chunks c
       JOIN documents d ON c.document_id = d.id
+      WHERE d.session_id = ${sessionId}
       ORDER BY c.embedding <=> ${JSON.stringify(queryEmbedding)}
       LIMIT 5
     `;
