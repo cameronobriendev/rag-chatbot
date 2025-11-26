@@ -1,6 +1,5 @@
 import { withCsrf } from '../../../lib/csrf-middleware.js';
 import { getDB } from '../../../lib/db.js';
-import { extractTextFromPDF } from '../../../lib/pdf-extractor.js';
 import { chunkText, estimateTokenCount } from '../../../lib/text-chunking.js';
 import { generateEmbeddings } from '../../../lib/embeddings.js';
 
@@ -56,9 +55,21 @@ async function handler(req) {
     let detectedFileType = '';
 
     if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
-      console.log('[Upload] Detected PDF file, extracting text...');
-      // Extract text from PDF
-      const pdfData = await extractTextFromPDF(buffer);
+      console.log('[Upload] Detected PDF file, sending to DO for extraction...');
+
+      // Send to Digital Ocean PDF extractor service
+      const extractResponse = await fetch('http://143.110.154.10:3003/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileData, fileName })
+      });
+
+      if (!extractResponse.ok) {
+        const error = await extractResponse.json();
+        throw new Error(`PDF extraction failed: ${error.error || 'Unknown error'}`);
+      }
+
+      const pdfData = await extractResponse.json();
       text = pdfData.text;
       detectedFileType = 'pdf';
 
