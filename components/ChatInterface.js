@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { put } from '@vercel/blob/client';
+import { upload } from '@vercel/blob/client';
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState([]);
@@ -92,16 +92,10 @@ export default function ChatInterface() {
         content: `Uploading "${file.name}" to storage...`
       }]);
 
-      // Get token from environment
-      const token = process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN;
-
-      if (!token) {
-        throw new Error('NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN is not configured');
-      }
-
-      const blob = await put(file.name, file, {
+      // Upload to Vercel Blob using server-generated upload URL
+      const blob = await upload(file.name, file, {
         access: 'public',
-        token: token,
+        handleUploadUrl: '/api/blob-upload-url',
       });
 
       // Step 2: Send blob URL to backend for processing
