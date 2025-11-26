@@ -49,12 +49,14 @@ async function handler(req) {
 
     // Convert base64 to buffer
     const buffer = Buffer.from(fileData, 'base64');
+    console.log(`[Upload] Converted to buffer, size: ${buffer.length} bytes`);
 
     // Determine file type and extract text
     let text = '';
     let detectedFileType = '';
 
     if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
+      console.log('[Upload] Detected PDF file, extracting text...');
       // Extract text from PDF
       const pdfData = await extractTextFromPDF(buffer);
       text = pdfData.text;
