@@ -59,7 +59,7 @@ export async function POST(req) {
     // Use pgvector cosine similarity to find most relevant chunks
     // <=> is the cosine distance operator in pgvector
     // Filter by session_id to isolate user's documents
-    const results = await db`
+    const queryResult = await db`
       SELECT
         c.id,
         c.content,
@@ -73,6 +73,7 @@ export async function POST(req) {
       LIMIT 5
     `;
 
+    const results = queryResult.rows;
     const retrievalTime = Date.now() - retrievalStart;
 
     console.log(`[Chat] Found ${results.length} relevant chunks in ${retrievalTime}ms`);

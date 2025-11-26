@@ -30,7 +30,7 @@ async function handler(req) {
       RETURNING id
     `;
 
-    const deletedCount = result.length;
+    const deletedCount = result.rows.length;
 
     console.log(`[Clear Session] Deleted ${deletedCount} documents (and their chunks)`);
 

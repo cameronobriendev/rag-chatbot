@@ -135,7 +135,7 @@ async function handler(req) {
       RETURNING id, name, file_type, chunk_count, upload_date
     `;
 
-    const document = documentResult[0];
+    const document = documentResult.rows[0];
 
     console.log(`[Upload] Created document record: ${document.id}`);
 

@@ -9,7 +9,7 @@ export async function GET(req) {
   try {
     const db = getDB();
 
-    const documents = await db`
+    const documentsResult = await db`
       SELECT
         id,
         name,
@@ -23,7 +23,7 @@ export async function GET(req) {
     `;
 
     return new Response(
-      JSON.stringify({ documents }),
+      JSON.stringify({ documents: documentsResult.rows }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {
