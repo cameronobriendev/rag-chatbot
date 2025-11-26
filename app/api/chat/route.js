@@ -120,7 +120,7 @@ Question: ${query}
 Answer the question based on the context above. If you reference specific information, cite the source using [1], [2], etc.`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o',  // GPT-4 Omni: faster, cheaper, 128k context window
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
