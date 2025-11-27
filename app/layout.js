@@ -1,6 +1,7 @@
 import "./globals.css";
 import "./theme.css";
 import Script from 'next/script';
+import CampaignTracker from '../components/CampaignTracker';
 
 export const metadata = {
   title: "RAG Chatbot",
@@ -21,7 +22,10 @@ export default function RootLayout({ children }) {
           strategy="afterInteractive"
         />
       </head>
-      <body className="w-full">{children}</body>
+      <body className="w-full">
+        <CampaignTracker />
+        {children}
+      </body>
     </html>
   );
 }
