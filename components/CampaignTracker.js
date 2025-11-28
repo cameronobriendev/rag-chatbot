@@ -25,7 +25,7 @@ export default function CampaignTracker() {
         window.umami.track('campaign-pageview', {
           client: campaignClient,
           session: campaignSession,
-          page: pathname,
+          page: window.location.hostname + pathname,
           timestamp: new Date().toISOString()
         })
       }
@@ -39,7 +39,7 @@ export default function CampaignTracker() {
         body: JSON.stringify({
           client: campaignClient,
           session: campaignSession,
-          page: pathname,
+          page: window.location.hostname + pathname,
           timestamp: new Date().toISOString()
         })
       }).catch(err => console.error('Campaign tracking error:', err))
